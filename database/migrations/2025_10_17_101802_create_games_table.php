@@ -16,7 +16,8 @@ return new class extends Migration
 
             $table->string('name')->nullable(); // e.g appoly-demo appoly-friends etc can be nullable, wont display name if null
 
-            $table->integer('current_round')->default(0); //first round is 0 of 3
+            $table->integer('current_round')->default(0); //first round is 0 of 3 = 4 means it ended
+            
 
             $table->timestamps();
         });

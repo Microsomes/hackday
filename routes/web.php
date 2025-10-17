@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\GameStarted;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,7 +20,9 @@ Route::get('/listen', function (){
 });
 
 
-
+Route::get('/login', [AuthController::class, 'view']);
+Route::post('/loginAnnon', [AuthController::class, 'loginAnnon']);
+Route::post('/submit-food-in-game/{game}',[GameController::class, 'addFoodItem']);
 
 
 require __DIR__.'/settings.php';
