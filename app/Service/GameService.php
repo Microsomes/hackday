@@ -85,9 +85,7 @@ class GameService
             }
         }
 
-        return [
-            'waiting_on' => $allPeopleWaitingOn
-        ];
+        return $allPeopleWaitingOn;
     }
 
     public function addFoodInGame(Game $game, array $data): bool
