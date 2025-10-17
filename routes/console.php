@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\WaitingForUserEvent;
 use App\Service\GameService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -20,7 +21,7 @@ Schedule::call(function () {
 
         Log::debug($users);
 
-        
+        WaitingForUserEvent::dispatch($users);
 
             
     }catch(Exception $e){}
