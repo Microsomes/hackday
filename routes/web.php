@@ -1,10 +1,11 @@
 <?php
 
 use App\Events\GameStarted;
+use App\Http\Controllers\GameController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', [\App\Http\Controllers\GameController::class, 'index'])->name('game');
+Route::get('/', [GameController::class, 'index'])->name('game');
 
 
 Route::get('/testevent', function(){

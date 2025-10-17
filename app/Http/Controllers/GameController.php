@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
+
 class GameController extends Controller
 {
     public function index()
     {
-        return inertia('Game', [
-
-        ]);
+        return Inertia::render('game/Game');
     }
 }
