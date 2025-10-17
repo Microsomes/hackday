@@ -1,24 +1,24 @@
 <script lang="ts">
-import { defineComponent, defineEmits } from 'vue';
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-
-export default defineComponent({
-    components: {
-        Button,
-        CardTitle,
-        CardHeader,
+    import { defineComponent, defineEmits } from 'vue';
+    import {
         Card,
-        CardFooter,
         CardContent,
-    },
-});
+        CardFooter,
+        CardHeader,
+        CardTitle,
+    } from '@/components/ui/card';
+    import { Button } from '@/components/ui/button';
+
+    export default defineComponent({
+        components: {
+            Button,
+            CardTitle,
+            CardHeader,
+            Card,
+            CardFooter,
+            CardContent,
+        },
+    });
 </script>
 
 <template>

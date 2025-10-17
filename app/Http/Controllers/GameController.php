@@ -13,6 +13,11 @@ class GameController extends Controller
     public function index(GameService $gameService)
     {
         $latestGame = $gameService->getRecentGame();
+
+        if($latestGame->current_round == 0){
+            return redirect('/login');
+        }
+        
         $allParticipants = $latestGame->participants()->with('user')->get();
 
         $allFoodItems = $gameService->getRecentGameFoodItemsPerUser();
