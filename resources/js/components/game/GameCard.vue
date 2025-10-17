@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineEmits } from 'vue';
 import {
     Card,
     CardContent,
@@ -7,25 +7,15 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import {
-    ContextMenu,
-    ContextMenuContent,
-    ContextMenuItem,
-    ContextMenuTrigger,
-} from '@/components/ui/context-menu';
 import { Button } from '@/components/ui/button';
 
 export default defineComponent({
     components: {
         Button,
         CardTitle,
-        ContextMenuTrigger,
         CardHeader,
-        ContextMenuItem,
         Card,
         CardFooter,
-        ContextMenu,
-        ContextMenuContent,
         CardContent,
     },
 });
@@ -43,8 +33,10 @@ export default defineComponent({
                 </CardHeader>
                 <CardContent>
                     <p class="mb-2">Latte</p>
-                    <ButtonGroup class="flex items-center justify-center">
-                        <Button class="mr-4 bg-blue-100 text-black">🥷🏻 Steal</Button>
+                    <ButtonGroup class="round1 flex items-center justify-center">
+                        <Button class="mr-4 bg-blue-100 text-black"
+                        >🥷🏻 Steal</Button
+                        >
                         <Button class="bg-blue-100 text-black">🔄 Swap</Button>
                     </ButtonGroup>
                 </CardContent>
@@ -55,9 +47,15 @@ export default defineComponent({
                 </CardHeader>
                 <CardContent>
                     <p class="mb-2">Pancakes w/ Bacon</p>
-                    <ButtonGroup class="flex items-center justify-center">
-                        <Button class="mr-4 bg-blue-100 text-black">🥷🏻 Steal</Button>
-                        <Button class="bg-blue-100 text-black">🔄 Swap</Button>
+                    <ButtonGroup class="round2 flex items-center justify-center">
+                        <Button class="mr-4 bg-blue-100 text-black"
+                        >🥷🏻 Steal</Button
+                        >
+                        <Button
+                            @click="emit('food-swap');"
+                            class="bg-blue-100 text-black"
+                        >🔄 Swap</Button
+                        >
                     </ButtonGroup>
                 </CardContent>
             </Card>
@@ -67,14 +65,11 @@ export default defineComponent({
                 </CardHeader>
                 <CardContent>
                     <p class="mb-2">Hash Brown</p>
-                    <ButtonGroup class="flex items-center justify-center">
+                    <ButtonGroup class="round3 flex items-center justify-center">
                         <Button class="bg-blue-100 text-black">🛡️Shield</Button>
                     </ButtonGroup>
                 </CardContent>
             </Card>
-            <Button class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded">
-                Confirm
-            </Button>
         </CardContent>
         <CardFooter class="flex justify-between px-6 pb-6"> </CardFooter>
     </Card>

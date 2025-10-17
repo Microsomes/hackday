@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -15,12 +16,15 @@ class UserChoiceSubmitted implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     */
-    public function __construct()
+    
+    public User $user;
+
+    public string $choice;
+
+    public function __construct(User $user, string $choice) // $choice as in steam defent etc
     {
-        //
+        $this->user = $user;
+        $this->choice = $choice;
     }
 
     /**
@@ -31,7 +35,7 @@ class UserChoiceSubmitted implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new Channel('game-room'),
         ];
     }
 }

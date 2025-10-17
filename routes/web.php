@@ -3,6 +3,7 @@
 use App\Events\GameStarted;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameController;
+use App\Service\GameService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -23,6 +24,21 @@ Route::get('/listen', function (){
 Route::get('/login', [AuthController::class, 'view']);
 Route::post('/loginAnnon', [AuthController::class, 'loginAnnon']);
 Route::post('/submit-food-in-game/{game}',[GameController::class, 'addFoodItem']);
+
+Route::get('/startgame', [GameController::class, 'startGame']);
+
+
+Route::get('/food', function(GameService $gameService){
+    return $gameService->getRecentGameFoodItemsPerUser();
+});
+
+
+Route::get('/choiceleft', function(GameService $gameService){
+    return $gameService->getUserActionLeftInGame(
+        auth()->user()
+    );
+});
+
 
 
 require __DIR__.'/settings.php';

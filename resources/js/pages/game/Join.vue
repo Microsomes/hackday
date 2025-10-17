@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3';
-import { useEchoPresence } from '@laravel/echo-vue';
+import { router, useForm, usePage } from '@inertiajs/vue3';
+import { useEchoPresence, useEchoPublic } from '@laravel/echo-vue';
 import { onMounted, ref } from 'vue';
 
 const props = defineProps({
@@ -16,6 +16,9 @@ const props = defineProps({
     game: {
         type: Object,
     },
+    food_item_submitted:{
+        type: Boolean
+    }
 });
 
 const form = useForm({
@@ -69,10 +72,33 @@ onMounted(() => {
         }
     });
 });
+
+    const page = usePage();
+    const flashMessage = page.props.flash?.success;
+
+    onMounted(()=>{
+        console.log(flashMessage);
+    })
+
+
+    useEchoPublic('waiting-room', ".GameStarted", (e)=>{
+    console.log("the game has started")
+    router.get('/')
+    })
+
 </script>
 
 <template>
     <Head title="Join Battle" />
+
+   <div 
+    v-if="flashMessage"
+    class="max-w-md mx-auto mt-4 p-4 text-center text-white rounded-lg shadow-md
+           bg-green-500 border border-green-600
+           transition-all duration-300 ease-in-out"
+>
+    {{ flashMessage }}
+</div>
 
     <div
         class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-yellow-50 to-yellow-100 p-4"
@@ -80,7 +106,7 @@ onMounted(() => {
         <h1
             class="pt-4 pb-10 text-center text-4xl font-extrabold text-yellow-800 drop-shadow-md"
         >
-            Join the Breakfast Battle!
+            Join the Breakfast Battle! 
         </h1>
 
         <div
@@ -111,8 +137,12 @@ onMounted(() => {
                 Welcome <span class="font-bold">{{ username }}</span
                 >! We are in the pre-start round. Enter your breakfast below:
             </p>
+            
+            <div class="text-black" v-if="food_item_submitted">
+                Your breakfast menu has been submitted awaiting others...
+            </div>
 
-            <form @submit.prevent="submitBreakfast" class="flex flex-col gap-4">
+            <form v-if="!food_item_submitted" @submit.prevent="submitBreakfast" class="flex flex-col gap-4">
                 <div class="flex flex-col">
                     <label class="mb-1 font-semibold text-gray-700" for="main"
                         >Main Dish</label

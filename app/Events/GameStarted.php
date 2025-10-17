@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Game;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -16,12 +17,15 @@ class GameStarted implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
 
-    public string $msg;
+    public Game $game;
+    public array $allParticipants;
 
-    public function __construct($msg)
+    public function __construct(Game $game)
     {
-        $this->msg = $msg;
+        $this->game = $game;
+        $this->allParticipants = $game->participants()->with('user:id,username')->get()->toArray();
     }
+
 
     /**
      * Get the channels the event should broadcast on.

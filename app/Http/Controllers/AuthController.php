@@ -38,17 +38,26 @@ class AuthController extends Controller
 
         $game = $gameService->getRecentGame();
 
+        $isFoodSubmitted = false;
+
         if ($isLoggedIn) {
             //lets just join the user in the current game, hackday hacks
 
             $gameService->joinGame(auth()->user(), $game);
+
+            $foodItemSubmitted = $gameService->checkIfFoodAdded($game, auth()->user());
+
+            $isFoodSubmitted = $foodItemSubmitted;
+            
         }
+
 
         return Inertia::render('game/Join', [
             'isLoggedIn' => $isLoggedIn,
             'username' => $username,
             'game' => $game,
-            'gameRound' => $game->current_round
+            'gameRound' => $game->current_round,
+            'food_item_submitted' => $isFoodSubmitted
         ]);
     }
 }
