@@ -7,12 +7,10 @@ use App\Models\GameParticipants;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\GameRound>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FoodItems>
  */
-class GameRoundFactory extends Factory
+class FoodItemsFactory extends Factory
 {
-
-
     /**
      * Define the model's default state.
      *
@@ -23,11 +21,11 @@ class GameRoundFactory extends Factory
         return [
             'game_id' => Game::factory(),
             'game_participant_id' => GameParticipants::factory(),
-            'game_round' => 0,
-            'power_used' => fake()->randomElement([
-                'steal',
-                'defend',
-                'swap'
+            'food_name' => fake()->name(),
+            'type' => fake()->randomElement([
+                'drink',
+                'side',
+                'main'
             ]),
             'unique_key' => fake()->uuid()
         ];
