@@ -27,7 +27,7 @@ Route::post('/submit-food-in-game/{game}',[GameController::class, 'addFoodItem']
 
 Route::get('/startgame', [GameController::class, 'startGame']);
 
-
+ 
 Route::get('/food', function(GameService $gameService){
     return $gameService->getRecentGameFoodItemsPerUser();
 });
@@ -37,6 +37,10 @@ Route::get('/choiceleft', function(GameService $gameService){
     return $gameService->getUserActionLeftInGame(
         auth()->user()
     );
+});
+
+Route::get('/waitingfor', function(GameService $gameService){
+    return $gameService->checkWaitingOn($gameService->getRecentGame());
 });
 
 

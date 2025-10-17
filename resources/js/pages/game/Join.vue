@@ -86,6 +86,17 @@ onMounted(() => {
     router.get('/')
     })
 
+
+    
+
+
+    useEchoPublic('waiting-room', ".WaitingForUser", (e)=>{
+    console.log("who we waiting on name and shame")
+        console.log(e);
+    })
+
+
+
 </script>
 
 <template>

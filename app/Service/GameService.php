@@ -26,7 +26,7 @@ class GameService
             $game
         );
     }
-    
+
     public function joinGame(User $user, Game $game): bool
     {
         //check if user is not already apart of the game
@@ -49,26 +49,50 @@ class GameService
     }
 
 
-    
+
     public function checkIfFoodAdded(Game $game, User $user): bool
     {
-         $gameParticipant = GameParticipants::where([
+        $gameParticipant = GameParticipants::where([
             'game_id' => $game->id,
             'user_id' => $user->id
         ])->first();
 
-        $mainKey = $game->id.'_'.$gameParticipant->id.'_main';
-        $sideKey = $game->id.'_'.$gameParticipant->id.'_side';
-        $drinkKey = $game->id.'_'.$gameParticipant->id.'_drink';
+        $mainKey = $game->id . '_' . $gameParticipant->id . '_main';
+        $sideKey = $game->id . '_' . $gameParticipant->id . '_side';
+        $drinkKey = $game->id . '_' . $gameParticipant->id . '_drink';
 
-        $mainExists = FoodItems::where('unique_key',$mainKey )->exists();
+        $mainExists = FoodItems::where('unique_key', $mainKey)->exists();
 
-       return $mainExists;
-
+        return $mainExists;
     }
 
-    public function addFoodInGame(Game $game, array $data):bool {
-        
+    //returns list of users who never submitted their food
+    public function checkWaitingOn(Game $game): array
+    {
+        $gameParticipants = GameParticipants::where([
+            'game_id' => $game->id,
+        ])->get();
+
+        $allPeopleWaitingOn = [];
+
+        foreach($gameParticipants as $participant)
+        {
+            $username = $participant->user->username;
+            $hasAdded = $this->checkIfFoodAdded($game,$participant->user);
+            if(!$hasAdded)
+            {
+                $allPeopleWaitingOn[] = $username;
+            }
+        }
+
+        return [
+            'waiting_on' => $allPeopleWaitingOn
+        ];
+    }
+
+    public function addFoodInGame(Game $game, array $data): bool
+    {
+
         $gameParticipant = GameParticipants::where([
             'game_id' => $game->id,
             'user_id' => auth()->user()->id
@@ -79,7 +103,7 @@ class GameService
             'game_participant_id' => $gameParticipant->id,
             'food_name' => $data['main'],
             'type' => 'main',
-            'unique_key' => $game->id.'_'.$gameParticipant->id.'_main'
+            'unique_key' => $game->id . '_' . $gameParticipant->id . '_main'
         ]);
 
         FoodItems::create([
@@ -87,7 +111,7 @@ class GameService
             'game_participant_id' => $gameParticipant->id,
             'food_name' => $data['side'],
             'type' => 'side',
-            'unique_key' => $game->id.'_'.$gameParticipant->id.'_side'
+            'unique_key' => $game->id . '_' . $gameParticipant->id . '_side'
         ]);
 
         FoodItems::create([
@@ -95,17 +119,16 @@ class GameService
             'game_participant_id' => $gameParticipant->id,
             'food_name' => $data['drink'],
             'type' => 'drink',
-            'unique_key' => $game->id.'_'.$gameParticipant->id.'_drink'
+            'unique_key' => $game->id . '_' . $gameParticipant->id . '_drink'
         ]);
 
         return true;
-        
     }
 
     public function getUserActionLeftInGame(User $user)
     {
         $game = $this->getRecentGame();
-        
+
         $gameParticipant = GameParticipants::where([
             'user_id' => $user->id,
             'game_id' => $game->id
@@ -118,9 +141,9 @@ class GameService
 
         $actionsLeft = [];
 
-        if($gameRounds->count() == 0){
+        if ($gameRounds->count() == 0) {
             $actionsLeft = [
-                  'steal',
+                'steal',
                 'defend',
                 'swap'
             ];
@@ -138,12 +161,12 @@ class GameService
 
         $userFoodItem = [];
 
-        foreach($partcipants as $partcipant){
+        foreach ($partcipants as $partcipant) {
             $allFoods = FoodItems::where([
                 'game_id' => $game->id,
                 'game_participant_id' => $partcipant->id
             ])->get();
-            
+
             $userFoodItem[$partcipant->user->username] = $allFoods;
         }
 
