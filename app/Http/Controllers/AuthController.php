@@ -22,7 +22,7 @@ class AuthController extends Controller
         $isLoggedIn = Auth::check();
 
 
-        return redirect('/login');
+    return Inertia::location('/login');
     }
 
     public function view(GameService $gameService)
