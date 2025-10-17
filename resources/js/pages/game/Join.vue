@@ -1,121 +1,178 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { useEchoPresence } from '@laravel/echo-vue';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps({
     isLoggedIn: {
-        type: Boolean
+        type: Boolean,
     },
     username: {
-        type: String
+        type: String,
     },
     gameRound: {
-        type: Number
+        type: Number,
     },
-    game:{
-        type: Object
-    }
-})
+    game: {
+        type: Object,
+    },
+});
 
 const form = useForm({
-    username:''
-})
+    username: '',
+});
 
 const addFoodItem = useForm({
-    main:"",
-    side:"",
-    drink:""
-})
+    main: '',
+    side: '',
+    drink: '',
+});
 
-function loginAnnon(){
+const presenceUsers = ref<string[]>([]);
+
+function loginAnnon() {
     form.post('/loginAnnon', {
-        preserveUrl:true
-    })
+        preserveUrl: true,
+    });
 }
 
 function submitBreakfast() {
-    addFoodItem.post('/submit-food-in-game/'+ props.game.id, {
-        preserveScroll: true
-    })
+    addFoodItem.post('/submit-food-in-game/' + props.game.id, {
+        preserveScroll: true,
+    });
 }
 
-onMounted(()=>{
-})
+const { channel: presenceChannel } = useEchoPresence('waiting-room2');
 
-    const { channel:precenseChannel } = useEchoPresence('waiting-room2');
+onMounted(() => {
+    const channel = presenceChannel();
 
-    onMounted(()=>{
-        precenseChannel().here(function(u){
-            console.log(u)
-        })
+    channel.here((users) => {
+        presenceUsers.value = users
+            .map((user) => user?.username)
+            .filter((username): username is string => Boolean(username));
+    });
 
-        precenseChannel().joining(function(joinedUser){
-            console.log("someone joined:", joinedUser)
-        })
+    channel.joining((joinedUser) => {
+        const username = joinedUser?.username;
+        if (username && !presenceUsers.value.includes(username)) {
+            presenceUsers.value = [...presenceUsers.value, username];
+        }
+    });
 
-         precenseChannel().leaving(function(leftUser){
-            console.log("someone joined:", leftUser)
-        })
-
-    })
-
+    channel.leaving((leftUser) => {
+        const username = leftUser?.username;
+        if (username) {
+            presenceUsers.value = presenceUsers.value.filter(
+                (name) => name !== username,
+            );
+        }
+    });
+});
 </script>
 
 <template>
     <Head title="Join Battle" />
 
-    <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-b from-yellow-50 to-yellow-100 p-4">
-        <h1 class="text-4xl font-extrabold text-center pb-10 pt-4 text-yellow-800 drop-shadow-md">
+    <div
+        class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-yellow-50 to-yellow-100 p-4"
+    >
+        <h1
+            class="pt-4 pb-10 text-center text-4xl font-extrabold text-yellow-800 drop-shadow-md"
+        >
             Join the Breakfast Battle!
         </h1>
 
+        <div
+            v-if="presenceUsers.length"
+            class="mb-8 w-full max-w-lg rounded-2xl bg-white/80 p-6 text-center shadow-md backdrop-blur"
+        >
+            <h2 class="mb-3 text-xl font-semibold text-yellow-800">
+                Waiting Room
+            </h2>
+            <p class="mb-4 text-sm text-gray-600">Currently hanging out:</p>
+            <ul class="flex flex-wrap justify-center gap-2">
+                <li
+                    v-for="user in presenceUsers"
+                    :key="user"
+                    class="rounded-full bg-yellow-100 px-4 py-1 text-sm font-medium text-yellow-800 shadow"
+                >
+                    {{ user }}
+                </li>
+            </ul>
+        </div>
+
         <!-- Pre-start welcome + breakfast form -->
-        <div v-if="isLoggedIn && gameRound === 0" class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg flex flex-col gap-6">
-            <p class="text-gray-800 text-lg text-center font-medium">
-                Welcome <span class="font-bold">{{ username }}</span>! We are in the pre-start round. Enter your breakfast below:
+        <div
+            v-if="isLoggedIn && gameRound === 0"
+            class="flex w-full max-w-lg flex-col gap-6 rounded-2xl bg-white p-8 shadow-xl"
+        >
+            <p class="text-center text-lg font-medium text-gray-800">
+                Welcome <span class="font-bold">{{ username }}</span
+                >! We are in the pre-start round. Enter your breakfast below:
             </p>
 
             <form @submit.prevent="submitBreakfast" class="flex flex-col gap-4">
                 <div class="flex flex-col">
-                    <label class="text-gray-700 font-semibold mb-1" for="main">Main Dish</label>
+                    <label class="mb-1 font-semibold text-gray-700" for="main"
+                        >Main Dish</label
+                    >
                     <input
                         id="main"
                         type="text"
                         v-model="addFoodItem.main"
                         placeholder="E.g., Pancakes"
-    class="border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300"
+                        class="rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-yellow-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
                     />
-                    <p v-if="addFoodItem.errors.main" class="text-red-500 text-sm mt-1">{{ addFoodItem.errors.main }}</p>
+                    <p
+                        v-if="addFoodItem.errors.main"
+                        class="mt-1 text-sm text-red-500"
+                    >
+                        {{ addFoodItem.errors.main }}
+                    </p>
                 </div>
 
                 <div class="flex flex-col">
-                    <label class="text-gray-700 font-semibold mb-1" for="side">Side Dish</label>
+                    <label class="mb-1 font-semibold text-gray-700" for="side"
+                        >Side Dish</label
+                    >
                     <input
                         id="side"
                         type="text"
                         v-model="addFoodItem.side"
                         placeholder="E.g., Bacon"
-    class="border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300"
+                        class="rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-yellow-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
                     />
-                    <p v-if="addFoodItem.errors.side" class="text-red-500 text-sm mt-1">{{ addFoodItem.errors.side }}</p>
+                    <p
+                        v-if="addFoodItem.errors.side"
+                        class="mt-1 text-sm text-red-500"
+                    >
+                        {{ addFoodItem.errors.side }}
+                    </p>
                 </div>
 
                 <div class="flex flex-col">
-                    <label class="text-gray-700 font-semibold mb-1" for="drink">Drink</label>
+                    <label class="mb-1 font-semibold text-gray-700" for="drink"
+                        >Drink</label
+                    >
                     <input
                         id="drink"
                         type="text"
                         v-model="addFoodItem.drink"
                         placeholder="E.g., Orange Juice"
-    class="border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300"
+                        class="rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-yellow-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
                     />
-                    <p v-if="addFoodItem.errors.drink" class="text-red-500 text-sm mt-1">{{ addFoodItem.errors.drink }}</p>
+                    <p
+                        v-if="addFoodItem.errors.drink"
+                        class="mt-1 text-sm text-red-500"
+                    >
+                        {{ addFoodItem.errors.drink }}
+                    </p>
                 </div>
 
-                <button 
+                <button
                     type="submit"
-                    class="bg-yellow-500 text-white font-bold rounded-lg px-4 py-2 hover:bg-yellow-600 transition shadow-md"
+                    class="rounded-lg bg-yellow-500 px-4 py-2 font-bold text-white shadow-md transition hover:bg-yellow-600"
                 >
                     Submit Breakfast
                 </button>
@@ -123,23 +180,31 @@ onMounted(()=>{
         </div>
 
         <!-- Login form -->
-        <div v-if="!isLoggedIn" class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
-            <p class="text-gray-700 mb-4 text-center text-lg font-medium">
+        <div
+            v-if="!isLoggedIn"
+            class="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl"
+        >
+            <p class="mb-4 text-center text-lg font-medium text-gray-700">
                 You are not logged in. To join, just enter a username:
             </p>
-            
-            <form @submit.prevent="loginAnnon" class="flex flex-col gap-4">
-                <input 
-                    type="text" 
-                    placeholder="Enter a username" 
-                    v-model="form.username" 
-    class="border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300"
-                />
-                <p v-if="form.errors.username" class="text-red-500 text-sm mt-1">{{ form.errors.username }}</p>
 
-                <button 
+            <form @submit.prevent="loginAnnon" class="flex flex-col gap-4">
+                <input
+                    type="text"
+                    placeholder="Enter a username"
+                    v-model="form.username"
+                    class="rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-yellow-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                />
+                <p
+                    v-if="form.errors.username"
+                    class="mt-1 text-sm text-red-500"
+                >
+                    {{ form.errors.username }}
+                </p>
+
+                <button
                     type="submit"
-                    class="bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700 transition shadow-md"
+                    class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-md transition hover:bg-indigo-700"
                 >
                     Join
                 </button>
