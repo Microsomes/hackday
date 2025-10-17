@@ -24,6 +24,8 @@ return new class extends Migration
                 'swap'
             ]);
 
+            $table->string('unique_key')->unique(); //should be game_round+game_id+game_participant_id then we can ensure db doesnt allow more then 1 selection per round per user.
+
             $table->timestamps();
         });
     }

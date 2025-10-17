@@ -25,6 +25,8 @@ return new class extends Migration
                 'main'
             ]);
 
+            $table->string('unique_key')->unique(); // game_id+game_participant_id+type so we can ensure only 1 drink 1 side and 1 main per user.
+
             $table->timestamps();
         });
     }
