@@ -24,4 +24,4 @@ Schedule::call(function () {
 
             
     }catch(Exception $e){}
-})->everyMinute();
+})->everyFiveSeconds();
