@@ -12,10 +12,20 @@ class GameController extends Controller
 {
     public function index(GameService $gameService)
     {
+        
         $latestGame = $gameService->getRecentGame();
 
         if($latestGame->current_round == 0){
             return redirect('/login');
+        }
+
+        if(env('PLAN_PHASE') == 2)
+        {
+            $foodItems = $gameService->getRecentGameFoodItemsPerUser();
+            //lets just go to plan b
+            return Inertia::render('planb/planb', [
+                'food_items' => $foodItems
+            ]);
         }
         
         $allParticipants = $latestGame->participants()->with('user')->get();
