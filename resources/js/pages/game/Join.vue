@@ -16,9 +16,9 @@ const props = defineProps({
     game: {
         type: Object,
     },
-    food_item_submitted:{
-        type: Boolean
-    }
+    food_item_submitted: {
+        type: Boolean,
+    },
 });
 
 const form = useForm({
@@ -32,6 +32,9 @@ const addFoodItem = useForm({
 });
 
 const presenceUsers = ref<string[]>([]);
+const waitingUsers = ref<string[]>([]);
+
+const waitingCount = computed(() => waitingUsers.value.length);
 
 function loginAnnon() {
     form.post('/loginAnnon', {
@@ -73,43 +76,40 @@ onMounted(() => {
     });
 });
 
-    const page = usePage();
-    const flashMessage = page.props.flash?.success;
+const page = usePage();
+const flashMessage = page.props.flash?.success;
 
-    onMounted(()=>{
-        console.log(flashMessage);
-    })
+onMounted(() => {
+    console.log(flashMessage);
+});
 
+useEchoPublic('waiting-room', '.GameStarted', (e) => {
+    console.log('the game has started');
+    router.get('/');
+});
 
-    useEchoPublic('waiting-room', ".GameStarted", (e)=>{
-    console.log("the game has started")
-    router.get('/')
-    })
-
-
-    
-
-
-    useEchoPublic('waiting-room', ".WaitingForUser", (e)=>{
-    console.log("who we waiting on name and shame")
-        console.log(e.usernames);
-    })
-
-
-
+useEchoPublic('waiting-room', '.WaitingForUser', (e) => {
+    if (Array.isArray(e?.usernames)) {
+        waitingUsers.value = e.usernames.flatMap((username: unknown) =>
+            typeof username === 'string' && username.trim().length
+                ? username
+                : [],
+        );
+    } else {
+        waitingUsers.value = [];
+    }
+});
 </script>
 
 <template>
     <Head title="Join Battle" />
 
-   <div 
-    v-if="flashMessage"
-    class="max-w-md mx-auto mt-4 p-4 text-center text-white rounded-lg shadow-md
-           bg-green-500 border border-green-600
-           transition-all duration-300 ease-in-out"
->
-    {{ flashMessage }}
-</div>
+    <div
+        v-if="flashMessage"
+        class="mx-auto mt-4 max-w-md rounded-lg border border-green-600 bg-green-500 p-4 text-center text-white shadow-md transition-all duration-300 ease-in-out"
+    >
+        {{ flashMessage }}
+    </div>
 
     <div
         class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-yellow-50 to-yellow-100 p-4"
@@ -117,7 +117,7 @@ onMounted(() => {
         <h1
             class="pt-4 pb-10 text-center text-4xl font-extrabold text-yellow-800 drop-shadow-md"
         >
-            Join the Breakfast Battle! 
+            Join the Breakfast Battle!
         </h1>
 
         <div
@@ -137,6 +137,35 @@ onMounted(() => {
                     {{ user }}
                 </li>
             </ul>
+
+            <div
+                v-if="waitingUsers.length"
+                class="mt-6 rounded-xl border border-yellow-200 bg-white/90 p-4 text-left shadow-sm"
+            >
+                <p
+                    class="mb-2 text-sm font-semibold tracking-wide text-yellow-700 uppercase"
+                >
+                    Waiting on submissions
+                </p>
+                <p class="mb-3 text-sm text-gray-600">
+                    {{ waitingCount }}
+                    {{ waitingCount === 1 ? 'player is' : 'players are' }} still
+                    picking a dish:
+                </p>
+                <ul class="space-y-2">
+                    <li
+                        v-for="waitingUser in waitingUsers"
+                        :key="waitingUser"
+                        class="flex items-center justify-between rounded-lg bg-yellow-50 px-3 py-2 text-yellow-800"
+                    >
+                        <span class="font-medium">{{ waitingUser }}</span>
+                        <span
+                            class="text-xs tracking-widest text-yellow-600 uppercase"
+                            >Still cooking…</span
+                        >
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <!-- Pre-start welcome + breakfast form -->
@@ -148,12 +177,16 @@ onMounted(() => {
                 Welcome <span class="font-bold">{{ username }}</span
                 >! We are in the pre-start round. Enter your breakfast below:
             </p>
-            
+
             <div class="text-black" v-if="food_item_submitted">
                 Your breakfast menu has been submitted awaiting others...
             </div>
 
-            <form v-if="!food_item_submitted" @submit.prevent="submitBreakfast" class="flex flex-col gap-4">
+            <form
+                v-if="!food_item_submitted"
+                @submit.prevent="submitBreakfast"
+                class="flex flex-col gap-4"
+            >
                 <div class="flex flex-col">
                     <label class="mb-1 font-semibold text-gray-700" for="main"
                         >Main Dish</label
