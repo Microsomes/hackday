@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { useEchoPresence, useEchoPublic } from '@laravel/echo-vue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps({
     isLoggedIn: {
